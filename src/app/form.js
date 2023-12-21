@@ -8,14 +8,19 @@ const SimpleForm = () => {
   const [monthlyContribution, setMonthlyContribution] = useState("");
   const [years, setYears] = useState("");
   const [balance, setBalance] = useState("");
+  const [calculationList, setCalculationList] = useState([]);
   const [totalFutureValue, setTotalFutureValue] = useState(null);
 
   const handleCalculate = () => {
-    const totalFutureValue = calculateFutureValue();
+    console.log(initialSavings, interestRate, monthlyContribution, years)
+    const totalFutureValue = calculateFutureValueRecursive(
+      initialSavings,
+      monthlyContribution,
+      interestRate,
+      years
+    );
     setTotalFutureValue(totalFutureValue);
   };
-
-  // const set/
 
   const handleReset = () => {
     // Reset all the input fields
@@ -24,22 +29,30 @@ const SimpleForm = () => {
     setMonthlyContribution("");
     setYears("");
     setBalance("");
+    setCalculationList([]);
     setTotalFutureValue(null);
   };
 
-  // formula: FV = P * (((1 + r)**(n*t) - 1) / (r/n)) + b, P = monthlyContribution, b = balance, r = interestRate, n = 12, t = years
-  const calculateFutureValue = () => {
-    let balance = initialSavings;
-    const P = parseFloat(monthlyContribution);
-    const b = parseFloat(balance);
-    const r = parseFloat(interestRate) / 100 / 12;
-    const n = 12;
-    const t = parseFloat(years);
+  const calculateFutureValueRecursive = (
+    principal,
+    monthlyDeposit,
+    annualInterestRate,
+    years
+  ) => {
+    const annualInterestRateDecimal = annualInterestRate / 100;
 
-    const totalFutureValue = P * (((1 + r) ** (n * t) - 1) / (r / n)) + b;
+    for (let year = 1; year <= years; year++) {
+      // Deposit at the beginning of the year
+      principal = parseFloat(principal) + parseFloat(monthlyDeposit) * 12;
 
-    return totalFutureValue;
-  };
+      // Calculate interest for the current year
+      const interest = principal * annualInterestRateDecimal;
+      principal += interest;
+    }
+
+    // force convert to 2 decimal places
+    return parseFloat(principal).toFixed(2);
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -58,7 +71,19 @@ const SimpleForm = () => {
               className="inline-flex flex-1 items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-l-0 border-gray-300 rounded-e-md"
               placeholder="0.00"
               value={initialSavings}
-              onChange={(e) => setInitialSavings(e.target.value)}
+              onChange={(e) => {
+                // Allow any input while typing
+                setInitialSavings(e.target.value);
+              }}
+              onBlur={() => {
+                // On blur, format the value
+                const sanitizedValue = initialSavings.replace(/[^0-9.-]/g, "");
+                const nonNegativeValue = Math.max(
+                  0,
+                  parseFloat(sanitizedValue)
+                );
+                setInitialSavings(nonNegativeValue.toFixed(2));
+              }}
             />
           </div>
         </div>
@@ -76,7 +101,22 @@ const SimpleForm = () => {
                 className="inline-flex flex-1 items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-l-0 border-gray-300 rounded-e-md"
                 placeholder="0.00"
                 value={monthlyContribution}
-                onChange={(e) => setMonthlyContribution(e.target.value)}
+                onChange={(e) => {
+                  // Allow any input while typing
+                  setMonthlyContribution(e.target.value);
+                }}
+                onBlur={() => {
+                  // On blur, format the value
+                  const sanitizedValue = monthlyContribution.replace(
+                    /[^0-9.-]/g,
+                    ""
+                  );
+                  const nonNegativeValue = Math.max(
+                    0,
+                    parseFloat(sanitizedValue)
+                  );
+                  setMonthlyContribution(nonNegativeValue.toFixed(2));
+                }}
               />
             </div>
           </div>
@@ -93,7 +133,19 @@ const SimpleForm = () => {
                 className="inline-flex flex-1 items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-l-0 border-gray-300 rounded-e-md"
                 placeholder="0.00"
                 value={interestRate}
-                onChange={(e) => setInterestRate(e.target.value)}
+                onChange={(e) => {
+                  // Allow any input while typing
+                  setInterestRate(e.target.value);
+                }}
+                onBlur={() => {
+                  // On blur, format the value
+                  const sanitizedValue = interestRate.replace(/[^0-9.-]/g, "");
+                  const nonNegativeValue = Math.max(
+                    0,
+                    parseFloat(sanitizedValue)
+                  );
+                  setInterestRate(nonNegativeValue.toFixed(2));
+                }}
               />
             </div>
           </div>
@@ -107,7 +159,13 @@ const SimpleForm = () => {
                 className="inline-flex flex-1 items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md"
                 placeholder="0"
                 value={years}
-                onChange={(e) => setYears(e.target.value)}
+                onChange={(e) => {
+                  // Allow only numeric characters
+                  const sanitizedValue = e.target.value.replace(/[^0-9]/g, "");
+
+                  // Update state with the formatted value
+                  setYears(sanitizedValue);
+                }}
               />
               <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-l-0 border-gray-300 rounded-e-md">
                 Tahun
@@ -151,7 +209,7 @@ const SimpleForm = () => {
       {totalFutureValue !== null && (
         <div className="mt-4">
           <h2 className="text-xl font-semibold">Total Future Value:</h2>
-          <p className="text-lg">{`RM ${totalFutureValue.toFixed(2)}`}</p>
+          <p className="text-lg">{`RM ${totalFutureValue}`}</p>
         </div>
       )}
     </div>
