@@ -237,9 +237,10 @@ const SimpleForm = () => {
         </div>
       )}
       
-      {totalFutureValue > 0.00 && (
-        <p className="text-sm text-gray-300">
-          * Jumlah ini adalah unjuran sahaja dan nilai sebenar mungkin berbeza atas faktor-faktor tertentu yang ditentukan oleh platform pelaburan.
+      {/* only shown when totalFutureValue greater than 0 */}
+      {totalFutureValue !== null && totalFutureValue > "0.00" && (
+        <p className="text-sm text-gray-300 mt-8">
+          * Kiraan ini adalah unjuran sahaja dan nilai sebenar mungkin berbeza atas faktor-faktor tertentu yang ditentukan oleh platform pelaburan.
         </p>
       )}
     </div>
