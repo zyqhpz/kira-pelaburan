@@ -100,7 +100,7 @@ const SimpleForm = () => {
 
   return (
     <div className="container mx-auto p-1 md:p-4">
-      <h1 className="text-lg md:text-3xl font-bold mb-4 text-center">Kira Pelaburan</h1>
+      <h1 className="text-lg md:text-3xl font-bold mb-4 text-center text-gray-100">Kira Pelaburan</h1>
       <form className="max-w-md mx-auto">
         <div>
           <label className="block text-sm md:text-md font-medium text-gray-100">
