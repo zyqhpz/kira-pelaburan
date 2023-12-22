@@ -96,15 +96,15 @@ const SimpleForm = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4 text-center">Kira Pelaburan</h1>
+    <div className="container mx-auto p-1 md:p-4">
+      <h1 className="text-lg md:text-3xl font-bold mb-4 text-center">Kira Pelaburan</h1>
       <form className="max-w-md mx-auto">
         <div>
-          <label className="block text-md font-medium text-gray-100">
+          <label className="block text-sm md:text-md font-medium text-gray-100">
             Jumlah Permulaan / Simpanan Semasa
           </label>
           <div className="flex mt-2 mb-4">
-            <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
+            <span className="inline-flex items-center px-3 text-xs md:text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 rounded-s-md">
               RM
             </span>
             <input
