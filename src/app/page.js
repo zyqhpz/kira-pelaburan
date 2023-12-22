@@ -8,6 +8,9 @@ export default function Home() {
           <SimpleForm />
         </div>
       </div>
+      <div className="mt-8 text-center bg-gray-900 text-gray-300 text-xs rounded-md shadow-lg p-2">
+        Dibangunkan oleh <a href="https://twitter.com/haziqhapiz" target="_blank" rel="noopener noreferrer" className="underline">Haziq Hapiz</a>
+      </div>
     </main>
   );
 }

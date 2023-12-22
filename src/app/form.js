@@ -25,6 +25,9 @@ const SimpleForm = () => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
+    if (result === "NaN") {
+      result = "0.00";
+    }
     setTotalFutureValue(result);
   };
 
@@ -232,6 +235,12 @@ const SimpleForm = () => {
           <h2 className="text-xl font-semibold">Unjuran Jumlah Pelaburan:</h2>
           <p className="text-lg">{`RM ${totalFutureValue}`}</p>
         </div>
+      )}
+      
+      {totalFutureValue > 0.00 && (
+        <p className="text-sm text-gray-300">
+          * Jumlah ini adalah unjuran sahaja dan nilai sebenar mungkin berbeza atas faktor-faktor tertentu yang ditentukan oleh platform pelaburan.
+        </p>
       )}
     </div>
   );
