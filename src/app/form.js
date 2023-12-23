@@ -2,22 +2,47 @@
 
 import { useEffect, useState } from "react";
 import InvestmentBox from "./components/investmentBox";
+import InvestmentGraph from "./components/graph";
 
-const SimpleForm = () => {
+const Form = () => {
   const [initialSavings, setInitialSavings] = useState("");
   const [calculationList, setCalculationList] = useState([]);
   const [totalFutureValue, setTotalFutureValue] = useState(null);
+  const [investmentDatas, setInvestmentDatas] = useState([]);
+  const [totalContributionDatas, setTotalContributionDatas] = useState([]);
 
   const handleCalculate = () => {
+    setInvestmentDatas([]);
+    setTotalContributionDatas([]);
+
+    // convert initialSavings to 2 decimal places
+    const initialSavingsDecimal = parseFloat(initialSavings).toFixed(2);
+
+    let currentYearCounter = 0
+
     let totalFutureValue = parseFloat(initialSavings);
+    let totalContribution = parseFloat(initialSavings);
+    
     calculationList.forEach((calculation) => {
       const { monthlyContribution, interestRate, years } = calculation;
       totalFutureValue = calculateFutureValue(
         totalFutureValue,
         monthlyContribution,
+        totalContribution,
         interestRate,
-        years
+        years,
+        currentYearCounter
       );
+
+      totalContribution = calculateTotalContributions(
+        totalContribution,
+        monthlyContribution,
+        years,
+        currentYearCounter
+      );
+
+      // increment year counter
+      currentYearCounter += parseInt(years);
     });
 
     // force convert to 2 decimal places
@@ -29,22 +54,88 @@ const SimpleForm = () => {
       result = "0.00";
     }
     setTotalFutureValue(result);
+
+    // append to graphDatas array to first index
+    setInvestmentDatas((investmentDatas) => [{ year: 0, principal: initialSavingsDecimal }, ...investmentDatas]);
+    setTotalContributionDatas((totalContributionDatas) => [{ year: 0, contribution: initialSavingsDecimal }, ...totalContributionDatas]);
   };
 
-  const handleReset = () => {
-    // Reset all the input fields
-    setInitialSavings("");
+  const calculateFutureValue = (
+    principal,
+    monthlyDeposit,
+    totalDeposit,
+    annualInterestRate,
+    years,
+    currentYearCounter
+  ) => {
+    const annualInterestRateDecimal = annualInterestRate / 100;
 
-    // Clear and set the calculation list with a new array
-    setCalculationList([
-      {
-        monthlyContribution: "",
-        interestRate: "",
-        years: "",
-      },
+    var investDatas = [];
+
+    for (let year = 1; year <= years; year++) {
+      // Deposit at the beginning of the year
+      principal = parseFloat(principal) + parseFloat(monthlyDeposit) * 12;
+
+      // Calculate interest for the current year
+      const interest = principal * annualInterestRateDecimal;
+      principal += interest;
+
+      principal = parseFloat(principal).toFixed(2);
+
+      totalDeposit += parseFloat(monthlyDeposit) * 12;
+
+      // increment year counter
+      currentYearCounter++;
+
+      var investmentData = {
+        year: currentYearCounter,
+        principal: principal,
+      };
+
+      // append to array
+      investDatas.push(investmentData);
+    }
+
+    setInvestmentDatas((investmentDatas) => [
+      ...investmentDatas,
+      ...investDatas,
+    ]);
+    return principal;
+  };
+
+  const calculateTotalContributions = (
+    totalContribution,
+    monthlyDeposit,
+    years,
+    currentYearCounter
+  ) => {
+    if (years === 0) {
+      return [];
+    }
+
+    var contributionDatas = [];
+
+    for (let year = 1; year <= years; year++) {
+      totalContribution += parseFloat(monthlyDeposit) * 12;
+
+      // increment year counter
+      currentYearCounter++;
+
+      var contributionData = {
+        year: currentYearCounter,
+        contribution: totalContribution.toFixed(2),
+      };
+
+      // append to array
+      contributionDatas.push(contributionData);
+    }
+
+    setTotalContributionDatas((totalContributionDatas) => [
+      ...totalContributionDatas,
+      ...contributionDatas,
     ]);
 
-    setTotalFutureValue(null);
+    return totalContribution;
   };
 
   const handleAddCalculation = () => {
@@ -67,24 +158,21 @@ const SimpleForm = () => {
     setCalculationList(newCalculationList);
   };
 
-  const calculateFutureValue = (
-    principal,
-    monthlyDeposit,
-    annualInterestRate,
-    years
-  ) => {
-    const annualInterestRateDecimal = annualInterestRate / 100;
+  const handleReset = () => {
+    // Reset all the input fields
+    setInitialSavings("");
 
-    for (let year = 1; year <= years; year++) {
-      // Deposit at the beginning of the year
-      principal = parseFloat(principal) + parseFloat(monthlyDeposit) * 12;
+    // Clear and set the calculation list with a new array
+    setCalculationList([
+      {
+        monthlyContribution: "",
+        interestRate: "",
+        years: "",
+      },
+    ]);
 
-      // Calculate interest for the current year
-      const interest = principal * annualInterestRateDecimal;
-      principal += interest;
-    }
-
-    return principal;
+    setTotalFutureValue(null);
+    setInvestmentDatas([]);
   };
 
   useEffect(() => {
@@ -100,7 +188,9 @@ const SimpleForm = () => {
 
   return (
     <div className="container mx-auto p-1 md:p-4">
-      <h1 className="text-lg md:text-3xl font-bold mb-4 text-center text-gray-100">Kira Pelaburan</h1>
+      <h1 className="text-lg md:text-3xl font-bold mb-4 text-center text-gray-100">
+        Kira Pelaburan
+      </h1>
       <form className="max-w-md mx-auto">
         <div>
           <label className="block text-sm md:text-md font-medium text-gray-100">
@@ -236,15 +326,23 @@ const SimpleForm = () => {
           <p className="text-lg">{`RM ${totalFutureValue}`}</p>
         </div>
       )}
-      
+
       {/* only shown when totalFutureValue greater than 0 */}
       {totalFutureValue !== null && totalFutureValue > "0.00" && (
         <p className="text-sm text-gray-300 mt-8">
-          * Kiraan ini adalah unjuran sahaja dan nilai sebenar mungkin berbeza atas faktor-faktor tertentu yang ditentukan oleh platform pelaburan.
+          * Kiraan ini adalah unjuran sahaja dan nilai sebenar mungkin berbeza
+          atas faktor-faktor tertentu yang ditentukan oleh platform pelaburan.
         </p>
+      )}
+
+      {/* only shown when totalFutureValue greater than 0 */}
+      {totalFutureValue !== null && totalFutureValue > "0.00" && (
+        <div className="text-center mt-8 rounded-md shadow-md bg-gray-900 px-2 py-2 w-full">
+          <InvestmentGraph investmentDatas={investmentDatas} totalContributionDatas={totalContributionDatas} />
+        </div>
       )}
     </div>
   );
 };
 
-export default SimpleForm;
+export default Form;
