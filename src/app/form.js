@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import InvestmentBox from "./components/investmentBox";
+import GraphElement from "./components/graph";
 
 const SimpleForm = () => {
   const [initialSavings, setInitialSavings] = useState("");
@@ -212,6 +213,7 @@ const SimpleForm = () => {
           </button>
         </div>
         <hr className="my-4" />
+        <GraphElement />
         <div className="flex flex-row gap-2">
           <button
             type="button"
