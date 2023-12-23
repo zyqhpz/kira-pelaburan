@@ -41,8 +41,26 @@ const InvestmentGraph = ({ investmentDatas, totalContributionDatas }) => {
         animation: {
           duration: 0,
         },
+        layout: {
+          autoPadding: true,
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: "bottom",
+            labels: {
+              color: "white",
+              padding: 10,
+            },
+          },
+        },
         scales: {
           x: {
+            position: "bottom",
+            title: {
+              display: true,
+              text: "Tahun",
+            },
             beginAtZero: true,
           },
         },
@@ -57,8 +75,10 @@ const InvestmentGraph = ({ investmentDatas, totalContributionDatas }) => {
 
   return (
     <div className="flex flex-col items-center justify-center space-y-4">
-      <span className="text-xl font-bold">Graf Pelaburan</span>
-      <canvas ref={chartRef} width="400" height="200"></canvas>
+      <span className="text-md md:text-xl font-bold">
+        Graf Pelaburan
+      </span>
+      <canvas ref={chartRef} width="400" height="250"></canvas>
     </div>
   );
 };
