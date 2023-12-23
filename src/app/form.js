@@ -8,28 +8,35 @@ const Form = () => {
   const [initialSavings, setInitialSavings] = useState("");
   const [calculationList, setCalculationList] = useState([]);
   const [totalFutureValue, setTotalFutureValue] = useState(null);
-  const [graphDatas, setGraphDatas] = useState([]);
+  const [investmentDatas, setInvestmentDatas] = useState([]);
+  const [totalContributionDatas, setTotalContributionDatas] = useState([]);
 
   const handleCalculate = () => {
-    setGraphDatas([]);
+    setInvestmentDatas([]);
+    setTotalContributionDatas([]);
 
     // convert initialSavings to 2 decimal places
     const initialSavingsDecimal = parseFloat(initialSavings).toFixed(2);
 
-    var initialData = {
-      year: 0,
-      principal: initialSavingsDecimal,
-    };
-
     let currentYearCounter = 0
 
     let totalFutureValue = parseFloat(initialSavings);
+    let totalContribution = parseFloat(initialSavings);
+    
     calculationList.forEach((calculation) => {
       const { monthlyContribution, interestRate, years } = calculation;
       totalFutureValue = calculateFutureValue(
         totalFutureValue,
         monthlyContribution,
+        totalContribution,
         interestRate,
+        years,
+        currentYearCounter
+      );
+
+      totalContribution = calculateTotalContributions(
+        totalContribution,
+        monthlyContribution,
         years,
         currentYearCounter
       );
@@ -49,20 +56,21 @@ const Form = () => {
     setTotalFutureValue(result);
 
     // append to graphDatas array to first index
-    setGraphDatas((graphDatas) => [initialData, ...graphDatas]);
+    setInvestmentDatas((investmentDatas) => [{ year: 0, principal: initialSavingsDecimal }, ...investmentDatas]);
+    setTotalContributionDatas((totalContributionDatas) => [{ year: 0, contribution: initialSavingsDecimal }, ...totalContributionDatas]);
   };
 
   const calculateFutureValue = (
     principal,
     monthlyDeposit,
+    totalDeposit,
     annualInterestRate,
     years,
     currentYearCounter
   ) => {
     const annualInterestRateDecimal = annualInterestRate / 100;
 
-    var datas = [];
-    // let currentYearCounter = yearCounter;
+    var investDatas = [];
 
     for (let year = 1; year <= years; year++) {
       // Deposit at the beginning of the year
@@ -74,19 +82,60 @@ const Form = () => {
 
       principal = parseFloat(principal).toFixed(2);
 
+      totalDeposit += parseFloat(monthlyDeposit) * 12;
+
       // increment year counter
       currentYearCounter++;
 
-      var graphData = {
+      var investmentData = {
         year: currentYearCounter,
         principal: principal,
       };
 
-      // append to graphDatas array
-      datas.push(graphData);
+      // append to array
+      investDatas.push(investmentData);
     }
-    setGraphDatas((graphDatas) => [...graphDatas, ...datas]);
+
+    setInvestmentDatas((investmentDatas) => [
+      ...investmentDatas,
+      ...investDatas,
+    ]);
     return principal;
+  };
+
+  const calculateTotalContributions = (
+    totalContribution,
+    monthlyDeposit,
+    years,
+    currentYearCounter
+  ) => {
+    if (years === 0) {
+      return [];
+    }
+
+    var contributionDatas = [];
+
+    for (let year = 1; year <= years; year++) {
+      totalContribution += parseFloat(monthlyDeposit) * 12;
+
+      // increment year counter
+      currentYearCounter++;
+
+      var contributionData = {
+        year: currentYearCounter,
+        contribution: totalContribution.toFixed(2),
+      };
+
+      // append to array
+      contributionDatas.push(contributionData);
+    }
+
+    setTotalContributionDatas((totalContributionDatas) => [
+      ...totalContributionDatas,
+      ...contributionDatas,
+    ]);
+
+    return totalContribution;
   };
 
   const handleAddCalculation = () => {
@@ -123,7 +172,7 @@ const Form = () => {
     ]);
 
     setTotalFutureValue(null);
-    setGraphDatas([]);
+    setInvestmentDatas([]);
   };
 
   useEffect(() => {
@@ -288,7 +337,9 @@ const Form = () => {
 
       {/* only shown when totalFutureValue greater than 0 */}
       {totalFutureValue !== null && totalFutureValue > "0.00" && (
-        <InvestmentGraph graphDatas={graphDatas} />
+        <div className="text-center mt-8 rounded-md shadow-md bg-gray-900 px-2 py-2 w-full">
+          <InvestmentGraph investmentDatas={investmentDatas} totalContributionDatas={totalContributionDatas} />
+        </div>
       )}
     </div>
   );

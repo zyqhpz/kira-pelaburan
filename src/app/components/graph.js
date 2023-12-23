@@ -1,11 +1,16 @@
 import { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
 
-const InvestmentGraph = ({graphDatas}) => {
+const InvestmentGraph = ({ investmentDatas, totalContributionDatas }) => {
   const chartRef = useRef(null);
-  
-  const labels = graphDatas.map((data) => data.year);
-  const principalData = graphDatas.map((data) => parseFloat(data.principal));
+
+  const labels = investmentDatas.map((data) => data.year);
+  const principalData = investmentDatas.map((data) =>
+    parseFloat(data.principal)
+  );
+  const totalContributionData = totalContributionDatas.map((data) =>
+    parseFloat(data.contribution)
+  );
 
   useEffect(() => {
     // Create a new chart instance
@@ -16,17 +21,28 @@ const InvestmentGraph = ({graphDatas}) => {
         labels: labels,
         datasets: [
           {
-            label: "Principal",
+            label: "Jumlah Pelaburan",
             data: principalData,
             fill: false,
             borderColor: "rgba(75, 192, 192, 1)",
             tension: 0.1,
-          }
+          },
+          {
+            label: "Jumlah Simpanan",
+            data: totalContributionData,
+            fill: false,
+            borderColor: "rgba(255, 99, 132, 1)",
+            tension: 0.1,
+          },
         ],
       },
       options: {
+        responsive: true,
+        animation: {
+          duration: 0,
+        },
         scales: {
-          y: {
+          x: {
             beginAtZero: true,
           },
         },
@@ -37,11 +53,11 @@ const InvestmentGraph = ({graphDatas}) => {
     return () => {
       myChart.destroy();
     };
-  }, []);
+  }, [labels, principalData, totalContributionData]);
 
   return (
-    <div>
-      <h1>Chart.js Double Line Chart in Next.js</h1>
+    <div className="flex flex-col items-center justify-center space-y-4">
+      <span className="text-xl font-bold">Graf Pelaburan</span>
       <canvas ref={chartRef} width="400" height="200"></canvas>
     </div>
   );
