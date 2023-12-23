@@ -2,14 +2,27 @@
 
 import { useEffect, useState } from "react";
 import InvestmentBox from "./components/investmentBox";
-import GraphElement from "./components/graph";
+import InvestmentGraph from "./components/graph";
 
-const SimpleForm = () => {
+const Form = () => {
   const [initialSavings, setInitialSavings] = useState("");
   const [calculationList, setCalculationList] = useState([]);
   const [totalFutureValue, setTotalFutureValue] = useState(null);
+  const [graphDatas, setGraphDatas] = useState([]);
 
   const handleCalculate = () => {
+    setGraphDatas([]);
+
+    // convert initialSavings to 2 decimal places
+    const initialSavingsDecimal = parseFloat(initialSavings).toFixed(2);
+
+    var initialData = {
+      year: 0,
+      principal: initialSavingsDecimal,
+    };
+
+    let currentYearCounter = 0
+
     let totalFutureValue = parseFloat(initialSavings);
     calculationList.forEach((calculation) => {
       const { monthlyContribution, interestRate, years } = calculation;
@@ -17,8 +30,12 @@ const SimpleForm = () => {
         totalFutureValue,
         monthlyContribution,
         interestRate,
-        years
+        years,
+        currentYearCounter
       );
+
+      // increment year counter
+      currentYearCounter += parseInt(years);
     });
 
     // force convert to 2 decimal places
@@ -30,22 +47,46 @@ const SimpleForm = () => {
       result = "0.00";
     }
     setTotalFutureValue(result);
+
+    // append to graphDatas array to first index
+    setGraphDatas((graphDatas) => [initialData, ...graphDatas]);
   };
 
-  const handleReset = () => {
-    // Reset all the input fields
-    setInitialSavings("");
+  const calculateFutureValue = (
+    principal,
+    monthlyDeposit,
+    annualInterestRate,
+    years,
+    currentYearCounter
+  ) => {
+    const annualInterestRateDecimal = annualInterestRate / 100;
 
-    // Clear and set the calculation list with a new array
-    setCalculationList([
-      {
-        monthlyContribution: "",
-        interestRate: "",
-        years: "",
-      },
-    ]);
+    var datas = [];
+    // let currentYearCounter = yearCounter;
 
-    setTotalFutureValue(null);
+    for (let year = 1; year <= years; year++) {
+      // Deposit at the beginning of the year
+      principal = parseFloat(principal) + parseFloat(monthlyDeposit) * 12;
+
+      // Calculate interest for the current year
+      const interest = principal * annualInterestRateDecimal;
+      principal += interest;
+
+      principal = parseFloat(principal).toFixed(2);
+
+      // increment year counter
+      currentYearCounter++;
+
+      var graphData = {
+        year: currentYearCounter,
+        principal: principal,
+      };
+
+      // append to graphDatas array
+      datas.push(graphData);
+    }
+    setGraphDatas((graphDatas) => [...graphDatas, ...datas]);
+    return principal;
   };
 
   const handleAddCalculation = () => {
@@ -68,24 +109,21 @@ const SimpleForm = () => {
     setCalculationList(newCalculationList);
   };
 
-  const calculateFutureValue = (
-    principal,
-    monthlyDeposit,
-    annualInterestRate,
-    years
-  ) => {
-    const annualInterestRateDecimal = annualInterestRate / 100;
+  const handleReset = () => {
+    // Reset all the input fields
+    setInitialSavings("");
 
-    for (let year = 1; year <= years; year++) {
-      // Deposit at the beginning of the year
-      principal = parseFloat(principal) + parseFloat(monthlyDeposit) * 12;
+    // Clear and set the calculation list with a new array
+    setCalculationList([
+      {
+        monthlyContribution: "",
+        interestRate: "",
+        years: "",
+      },
+    ]);
 
-      // Calculate interest for the current year
-      const interest = principal * annualInterestRateDecimal;
-      principal += interest;
-    }
-
-    return principal;
+    setTotalFutureValue(null);
+    setGraphDatas([]);
   };
 
   useEffect(() => {
@@ -101,7 +139,9 @@ const SimpleForm = () => {
 
   return (
     <div className="container mx-auto p-1 md:p-4">
-      <h1 className="text-lg md:text-3xl font-bold mb-4 text-center text-gray-100">Kira Pelaburan</h1>
+      <h1 className="text-lg md:text-3xl font-bold mb-4 text-center text-gray-100">
+        Kira Pelaburan
+      </h1>
       <form className="max-w-md mx-auto">
         <div>
           <label className="block text-sm md:text-md font-medium text-gray-100">
@@ -213,7 +253,6 @@ const SimpleForm = () => {
           </button>
         </div>
         <hr className="my-4" />
-        <GraphElement />
         <div className="flex flex-row gap-2">
           <button
             type="button"
@@ -238,15 +277,21 @@ const SimpleForm = () => {
           <p className="text-lg">{`RM ${totalFutureValue}`}</p>
         </div>
       )}
-      
+
       {/* only shown when totalFutureValue greater than 0 */}
       {totalFutureValue !== null && totalFutureValue > "0.00" && (
         <p className="text-sm text-gray-300 mt-8">
-          * Kiraan ini adalah unjuran sahaja dan nilai sebenar mungkin berbeza atas faktor-faktor tertentu yang ditentukan oleh platform pelaburan.
+          * Kiraan ini adalah unjuran sahaja dan nilai sebenar mungkin berbeza
+          atas faktor-faktor tertentu yang ditentukan oleh platform pelaburan.
         </p>
+      )}
+
+      {/* only shown when totalFutureValue greater than 0 */}
+      {totalFutureValue !== null && totalFutureValue > "0.00" && (
+        <InvestmentGraph graphDatas={graphDatas} />
       )}
     </div>
   );
 };
 
-export default SimpleForm;
+export default Form;

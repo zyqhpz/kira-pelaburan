@@ -1,10 +1,11 @@
-// pages/index.js
-
 import { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
 
-const IndexPage = () => {
+const InvestmentGraph = ({graphDatas}) => {
   const chartRef = useRef(null);
+  
+  const labels = graphDatas.map((data) => data.year);
+  const principalData = graphDatas.map((data) => parseFloat(data.principal));
 
   useEffect(() => {
     // Create a new chart instance
@@ -12,22 +13,15 @@ const IndexPage = () => {
     const myChart = new Chart(ctx, {
       type: "line",
       data: {
-        labels: ["January", "February", "March", "April", "May"],
+        labels: labels,
         datasets: [
           {
-            label: "Line 1",
-            data: [12, 19, 3, 5, 2],
+            label: "Principal",
+            data: principalData,
             fill: false,
             borderColor: "rgba(75, 192, 192, 1)",
             tension: 0.1,
-          },
-          {
-            label: "Line 2",
-            data: [5, 7, 2, 8, 10],
-            fill: false,
-            borderColor: "rgba(255, 99, 132, 1)",
-            tension: 0.1,
-          },
+          }
         ],
       },
       options: {
@@ -53,4 +47,4 @@ const IndexPage = () => {
   );
 };
 
-export default IndexPage;
+export default InvestmentGraph;
