@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
+    "allowJs": true
+  },
+  "include": ["**/*.js"]
 }
