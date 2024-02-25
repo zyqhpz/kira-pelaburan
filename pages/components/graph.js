@@ -1,18 +1,27 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Chart from "chart.js/auto";
 
 const InvestmentGraph = ({ investmentDatas, totalContributionDatas }) => {
   const chartRef = useRef(null);
 
-  const labels = investmentDatas.map((data) => data.year);
-  const principalData = investmentDatas.map((data) =>
-    parseFloat(data.principal)
-  );
-  const totalContributionData = totalContributionDatas.map((data) =>
-    parseFloat(data.contribution)
-  );
+  const [labels, setLabels] = useState(null); 
+  const [principalData, setPrincipalData] = useState(null);
+  const [totalContributionData, setTotalContributionData] = useState(null);
 
   useEffect(() => {
+
+    if (investmentDatas.length === 0) {
+      return;
+    } else {
+      setLabels(investmentDatas.map((data) => data.year));
+      setPrincipalData(investmentDatas.map((data) =>
+        parseFloat(data.principal)
+      ));
+      setTotalContributionData(totalContributionDatas.map((data) =>
+        parseFloat(data.contribution)
+      ));
+    }
+
     // Create a new chart instance
     const ctx = chartRef.current.getContext("2d");
     const myChart = new Chart(ctx, {
